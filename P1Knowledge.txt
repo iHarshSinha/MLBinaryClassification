@@ -1,0 +1,92 @@
+Preprocessing Summary: Strategy and Rationale
+---------------------------------------------
+
+The goal of preprocessing was to convert the raw, mixed-type founder dataset
+into a clean, fully numerical feature matrix suitable for LightGBM. The steps
+were designed based on insights from the EDA, especially regarding missing
+values, outliers, and categorical inconsistencies. A unified ColumnTransformer
+pipeline manages all transformations.
+
+1. Feature Engineering (Data Enrichment)
+----------------------------------------
+New informative features were created prior to the main pipeline:
+
+• age_at_founding = founder_age – years_since_founding
+• tenure_ratio = years_with_startup / years_since_founding
+• unhappy_overtime = interaction term combining the strongest risk-inducing
+  categorical levels
+
+Rationale:
+Interactions such as commitment relative to startup age (tenure_ratio) and
+starting conditions (age_at_founding) showed strong patterns in the EDA.
+Tree-based models can discover interactions, but explicitly adding these
+features gives the model a stronger signal. The unhappy_overtime feature
+especially captures high-risk combinations that LightGBM can exploit early.
+
+2. Handling Missing Data (Imputation)
+-------------------------------------
+Numerical:
+• monthly_revenue_generated → imputed using the median
+  (SimpleImputer(strategy='median'))
+
+Categorical:
+• work_life_balance_rating and venture_satisfaction → imputed using a new
+  category: "Missing"
+  (SimpleImputer(strategy='constant', fill_value='Missing'))
+
+Rationale:
+Revenue had heavy right-skew with large outliers; median is robust and avoids
+inflating the data.  
+For categorical features with ~12–17% missingness, the missingness itself
+likely carries predictive meaning. Assigning a dedicated "Missing" category
+lets the model treat the unknown status as a learnable signal.
+
+3. Scaling Numerical Data
+-------------------------
+All numerical features, including engineered ones, were standardized to mean 0
+and variance 1 using StandardScaler().
+
+Rationale:
+Tree-based models like LightGBM are not scale-sensitive, but scaling stabilizes
+training, prevents high-magnitude fields (e.g., revenue) from dominating early
+splits, and maintains compatibility with linear models (e.g., Logistic
+Regression, SVM) in future experiments.
+
+4. Encoding Categorical Data
+----------------------------
+
+A. Ordinal Encoding (For ordered categories)
+--------------------------------------------
+Applied to features such as:
+• work_life_balance_rating
+• venture_satisfaction
+
+(OrdinalEncoder with custom ordering derived from EDA)
+
+Rationale:
+Ordered categories have natural ranking (e.g., Poor < Average < Good <
+Excellent). Encoding them as integers preserves distance relationships and
+avoids unnecessary dimensionality from one-hot encoding.
+
+B. One-Hot Encoding (For nominal categories)
+--------------------------------------------
+Applied to:
+• founder_gender
+• personal_status
+• founder_role
+• any other unordered categorical fields
+
+Used:
+OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+
+Rationale:
+For purely nominal categories, one-hot avoids fake numeric relationships.  
+The handle_unknown='ignore' setting ensures robustness — if a new unseen
+category appears in the test set, the pipeline will not crash, and the model
+gracefully assigns zeros to unseen one-hot columns.
+
+---------------------------------------------
+This preprocessing pipeline ensures numerical stability, preserves important
+relationships, handles missingness intelligently, and produces a clean,
+model-ready dataset fully compatible with LightGBM and other ML algorithms.
+---------------------------------------------
