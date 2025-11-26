@@ -1,0 +1,252 @@
+36. What actually happens in memory when you write int x = 10;?
+
+Answer:
+The compiler allocates 4 bytes on the stack for x and stores the binary representation of 10 there.
+
+⸻
+
+37. Why is %c used for characters but %s used for strings in printf?
+
+Answer:
+Because %c prints a single byte, while %s expects a pointer to a null-terminated array of characters.
+
+⸻
+
+38. Why does scanf("%s", str) cause buffer overflow?
+
+Answer:
+Because %s reads until whitespace, without knowing the size of str.
+
+⸻
+
+39. What is the difference between strcpy(a, b) and a = b; for strings?
+
+Answer:
+strcpy copies characters into array a.
+a = b is invalid because arrays cannot be assigned.
+
+⸻
+
+40. Why is gets() unsafe and removed from modern C?
+
+Answer:
+Because it reads unlimited characters and guarantees buffer overflow.
+
+⸻
+
+41. What is the difference between ++*p and *p++?
+
+Answer:
+++*p increments the value pointed to.
+*p++ increments the pointer but returns the old value.
+
+⸻
+
+42. Why are uninitialized pointers dangerous?
+
+Answer:
+They contain garbage addresses; dereferencing them leads to undefined behavior.
+
+⸻
+
+43. What is the difference between a pointer and an array of pointers?
+
+Answer:
+A pointer stores one address.
+An array of pointers stores multiple addresses.
+
+⸻
+
+44. Why is sizeof(arr) different inside a function?
+
+Answer:
+Inside a function, arr decays to a pointer, so sizeof(arr) gives pointer size, not array size.
+
+⸻
+
+45. Why is malloc(sizeof(int)*n) preferred over malloc(n*sizeof(int*))?
+
+Answer:
+Because the former allocates memory for ints.
+The latter wrongly allocates memory for pointers.
+
+⸻
+
+46. What happens if you forget to allocate memory for a string before using strcpy?
+
+Answer:
+You will write into unallocated memory → segmentation fault.
+
+⸻
+
+47. What is the difference between static and dynamic arrays?
+
+Answer:
+Static arrays: size fixed at compile time, allocated on stack/ static memory.
+Dynamic arrays: size decided at runtime, allocated on heap.
+
+⸻
+
+48. Why is stack memory automatically freed but heap memory is not?
+
+Answer:
+Stack follows function call frames; when the function returns, the stack pointer moves back.
+Heap memory is manually managed by programmer.
+
+⸻
+
+49. Why are malloc, calloc, and realloc considered “unsafe”?
+
+Answer:
+They can fail and return NULL; using the pointer without checking leads to crashes.
+
+⸻
+
+50. Why can’t we use pointer arithmetic on void*?
+
+Answer:
+Because void has no size; the compiler cannot scale pointer steps.
+
+⸻
+
+51. Why does C allow pointer arithmetic but not arithmetic on addresses stored as integers?
+
+Answer:
+Pointer arithmetic is type-aware; integer arithmetic loses type information.
+
+⸻
+
+52. Why is main() allowed to have different signatures (int main(), int main(int argc…))?
+
+Answer:
+Both are standard conforming; the OS always receives the return code, unused arguments are optional.
+
+⸻
+
+53. What is the difference between passing a struct by value vs passing a pointer to struct?
+
+Answer:
+By value: entire struct is copied.
+By pointer: only the address is copied; function can modify original.
+
+⸻
+
+54. Why do linked list nodes use malloc instead of stack allocation?
+
+Answer:
+Nodes must persist after a function returns; stack-allocated nodes would vanish.
+
+⸻
+
+55. What happens if you don’t update the next pointer when deleting a node?
+
+Answer:
+You “lose” the rest of the list, causing memory leaks and broken structure.
+
+⸻
+
+56. Why is traversal required before deletion in a singly linked list?
+
+Answer:
+Because you need the previous node to update its next pointer.
+
+⸻
+
+57. Why do we use a dummy head node sometimes?
+
+Answer:
+To simplify edge cases like inserting at front or deleting the first element.
+
+⸻
+
+58. Why is recursion sometimes used for linked lists but not for large arrays?
+
+Answer:
+Recursion naturally follows the linked structure, but arrays can be huge and cause deep recursion → stack overflow.
+
+⸻
+
+59. Why might a linked list implementation become slower than an array for some problems?
+
+Answer:
+Poor cache locality — pointers jump around memory, causing many cache misses.
+
+⸻
+
+60. Why do we often use typedef struct node Node;?
+
+Answer:
+To avoid writing struct node repeatedly and improve readability.
+
+⸻
+
+61. What is the key conceptual difference between a pointer to an array and an array of pointers?
+
+Answer:
+Pointer to array → one pointer pointing to a contiguous block.
+Array of pointers → many pointers each pointing to different blocks.
+
+⸻
+
+62. Why is using global variables considered bad practice in C?
+
+Answer:
+They reduce modularity, make debugging harder, and introduce hidden dependencies.
+
+⸻
+
+63. Why can calling free(p) on a NULL pointer be safe?
+
+Answer:
+The C standard says freeing a NULL pointer has no effect.
+
+⸻
+
+64. Why might two pointers pointing to the same memory be useful?
+
+Answer:
+Allows aliasing/access from different places, needed in shared structures like linked lists.
+
+⸻
+
+65. Why does a function need to return a pointer for dynamic arrays but not for static arrays?
+
+Answer:
+Static arrays cannot be returned because they live on the stack.
+Dynamic arrays live on the heap and survive after the function returns.
+
+⸻
+
+66. Why can’t you compare two strings using ==?
+
+Answer:
+== compares addresses, not characters. To compare content, you use strcmp.
+
+⸻
+
+67. What is the difference between p = q; and *p = *q; for pointers?
+
+Answer:
+p = q copies the address.
+*p = *q copies the value stored at those addresses.
+
+⸻
+
+68. Why do structs allow mixed data types but arrays don’t?
+
+Answer:
+Arrays require all elements to be identical types; structs are heterogeneous collections.
+
+⸻
+
+69. What happens if you forget to put '\0' at the end of a char array used as a string?
+
+Answer:
+String functions keep reading memory beyond the array → undefined behavior.
+
+⸻
+
+70. Why do we check head == NULL before traversing a linked list?
+
+Answer:
+To avoid dereferencing a NULL pointer, which would crash the program.
