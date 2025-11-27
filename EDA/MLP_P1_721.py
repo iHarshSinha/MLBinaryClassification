@@ -1,7 +1,6 @@
-# ============================================================
+
 # 0. IMPORT PREPROCESSING + LIBRARIES
 
-# ===========================================================
 # --- Neural Network Search Complete ---
 # Best AUC Score: 0.8139pytho
 # Best Hyperparameters:
@@ -9,6 +8,8 @@
 from P1_preprocess import *
 import numpy as np
 import pandas as pd
+import os
+
 
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
@@ -17,10 +18,9 @@ from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold, cross_v
 from sklearn.metrics import f1_score
 from scipy.optimize import minimize
 
+os.makedirs("../output", exist_ok=True)
 
-# ============================================================
 # 1. DEFINE PIPELINE + PARAMETER SPACE
-# ============================================================
 print("\n--- Starting MLP Neural Network Training ---")
 
 pipeline = Pipeline([
@@ -39,9 +39,8 @@ param_dist = {
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 
-# ============================================================
+
 # 2. RANDOMIZED SEARCH
-# ============================================================
 random_search = RandomizedSearchCV(
     estimator=pipeline,
     param_distributions=param_dist,
@@ -66,9 +65,8 @@ print(best_params)
 best_mlp = random_search.best_estimator_
 
 
-# ============================================================
+
 # 3. OOF PROBAS + THRESHOLD OPTIMIZATION
-# ============================================================
 print("\n--- Performing OOF prediction for F1 threshold optimization ---")
 
 oof_probas = cross_val_predict(
@@ -101,9 +99,8 @@ print(f"Optimal Threshold: {optimal_threshold:.4f}")
 print(f"OOF F1 Score:     {optimal_f1:.4f}")
 
 
-# ============================================================
+
 # 4. TEST PREDICTION + SUBMISSION
-# ============================================================
 test_pred_probas = best_mlp.predict_proba(X_test_processed)[:, 1]
 
 hard_labels = np.where(test_pred_probas >= optimal_threshold, "Left", "Stayed")
@@ -113,7 +110,9 @@ submission = pd.DataFrame({
     "retention_status": hard_labels
 })
 
-submission.to_csv("mlp_f1_submission.csv", index=False)
+output_path = "../output/mlp_f1_submission.csv"
 
-print("\nSubmission Created: mlp_f1_submission.csv")
+submission.to_csv(output_path, index=False)
+
+print(f"\nSubmission Created: {output_path}")
 print(submission.head())

@@ -1,4 +1,3 @@
-# Best AUC Score: 0.8382
 # Best Parameters:
 # {'subsample': 0.8, 'reg_lambda': 0, 'reg_alpha': 0, 'num_leaves': 20, 'min_child_samples': 10, 'max_depth': 6, 'learning_rate': 0.01, 'colsample_bytree': 0.6}
 
@@ -6,13 +5,15 @@
 # --- Tuned LGBM F1 Results ---
 # Optimal Threshold: 0.5000
 # Maximized F1 Score (OOF): 0.7348
-# ============================================================
+
+
 # 0. IMPORT PREPROCESSING + LIBRARIES
-# ============================================================
 from P1_preprocess import *    
 import numpy as np
 import pandas as pd
 import lightgbm as lgb
+import os
+
 
 from sklearn.model_selection import (
     RandomizedSearchCV,
@@ -23,10 +24,9 @@ from sklearn.model_selection import (
 from sklearn.metrics import f1_score
 from scipy.optimize import minimize
 
+os.makedirs("../output", exist_ok=True)
 
-# ============================================================
-# 1. DEFINE BASE MODEL + PARAMETER SPACE
-# ============================================================
+# 1 Define models and hyperparameter spaces
 print("\n--- Starting Randomized Hyperparameter Search (LGBM) ---")
 
 base_lgbm = lgb.LGBMClassifier(
@@ -52,9 +52,8 @@ param_dist = {
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 
-# ============================================================
+
 # 2. RANDOMIZED SEARCH
-# ============================================================
 random_search = RandomizedSearchCV(
     estimator=base_lgbm,
     param_distributions=param_dist,
@@ -78,9 +77,8 @@ print("Best Parameters:")
 print(best_params)
 
 
-# ============================================================
+
 # 3. TRAIN BEST MODEL + OOF PROBAS FOR F1 THRESHOLD
-# ============================================================
 print("\n--- Final Model Training and F1 Optimization ---")
 
 best_lgbm = random_search.best_estimator_
@@ -96,9 +94,8 @@ oof_probas_tuned = cross_val_predict(
 )[:, 1]
 
 
-# ============================================================
+
 # 4. F1 THRESHOLD OPTIMIZATION
-# ============================================================
 def objective_f1_tuned(threshold):
     y_pred = (oof_probas_tuned >= threshold).astype(int)
     return -f1_score(y, y_pred)
@@ -119,9 +116,7 @@ print(f"Optimal Threshold: {optimal_threshold_tuned:.4f}")
 print(f"Maximized F1 Score (OOF): {optimal_f1_tuned:.4f}")
 
 
-# ============================================================
-# 5. TEST SET PREDICTION + SUBMISSION
-# ============================================================
+# 5. TEST PREDICTION + SUBMISSION FILE
 test_probas_tuned = best_lgbm.predict_proba(X_test_processed)[:, 1]
 
 hard_labels_tuned = np.where(
@@ -135,13 +130,15 @@ submission_df = pd.DataFrame({
     "retention_status": hard_labels_tuned
 })
 
+output_path = "../output/lgbm_hyperparameter_tuned_submission.csv"
+
 submission_df.to_csv(
-    "lgbm_hyperparameter_tuned_submission.csv",
+    output_path,
     index=False,
     encoding="utf-8"
 )
 
 print("\nSubmission File Created:")
-print(" -> lgbm_hyperparameter_tuned_submission.csv")
-print("\nPreview:")
+print(f" -> {output_path}\n")
+print("Preview:")
 print(submission_df.head())

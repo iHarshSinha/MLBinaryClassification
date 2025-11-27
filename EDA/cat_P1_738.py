@@ -1,7 +1,7 @@
-# ============================================================
+
 # 0. IMPORT PREPROCESSING + REQUIRED LIBRARIES
-# ============================================================
-from P1_preprocess import *    # brings X_processed, X_test_processed, y, test_ids into scope
+
+from P1_preprocess import *
 
 import catboost as cb
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
@@ -10,9 +10,8 @@ from scipy.optimize import minimize
 import numpy as np
 import pandas as pd
 
-# ============================================================
+
 # 1. TRAIN CATBOOST MODEL
-# ============================================================
 print("--- Training CatBoost Model ---")
 
 cb_clf = cb.CatBoostClassifier(
@@ -30,9 +29,8 @@ cb_test_probas = cb_clf.predict_proba(X_test_processed)[:, 1]
 
 print("CatBoost training + test prediction complete.\n")
 
-# ============================================================
+
 # 2. CROSS-VALIDATION (OOF PROBAS) + F1 THRESHOLD OPTIMIZATION
-# ============================================================
 print("Performing 5-Fold CV for CatBoost threshold optimization...")
 
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -66,9 +64,8 @@ print("\n--- CatBoost F1 Optimization Results ---")
 print(f"Optimal CatBoost Threshold: {optimal_threshold_cb:.4f}")
 print(f"Maximized CatBoost OOF F1 Score: {optimal_f1_cb:.4f}\n")
 
-# ============================================================
+
 # 3. FINAL SUBMISSION FILE
-# ============================================================
 hard_labels_cb = np.where(
     cb_test_probas >= optimal_threshold_cb,
     "Left",
@@ -80,8 +77,10 @@ submission_df_cb = pd.DataFrame({
     "retention_status": hard_labels_cb
 })
 
+output_path = "../output/catboost_f1_submission.csv"
+
 submission_df_cb.to_csv(
-    "catboost_f1_submission.csv",
+    output_path,
     index=False,
     encoding="utf-8"
 )

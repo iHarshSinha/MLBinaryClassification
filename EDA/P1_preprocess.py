@@ -8,21 +8,18 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 
-# -----------------------------
+
 # 1. Load Data
-# -----------------------------
 TRAIN_PATH = os.path.join('..', 'data', 'train.csv')
 TEST_PATH = os.path.join('..', 'data', 'test.csv')
 
 train_df = pd.read_csv(TRAIN_PATH)
 test_df = pd.read_csv(TEST_PATH)
 
-# 🔥 IMPORTANT: Save founder_id BEFORE feature engineering
+
 test_ids = test_df["founder_id"].copy()
 
-# -----------------------------
 # 2. Feature Engineering
-# -----------------------------
 def feature_engineering(df):
     df = df.copy()
 
@@ -45,18 +42,16 @@ train_df = feature_engineering(train_df)
 test_df = feature_engineering(test_df)
 
 
-# -----------------------------
+
 # 3. Target
-# -----------------------------
 train_df['retention_status'] = train_df['retention_status'].map({'Left': 1, 'Stayed': 0})
 
 X = train_df.drop('retention_status', axis=1)
 y = train_df['retention_status']
 X_test = test_df
 
-# -----------------------------
+
 # 4. Preprocessing
-# -----------------------------
 numerical_features = [
     'founder_age', 'years_with_startup', 'monthly_revenue_generated',
     'funding_rounds_led', 'distance_from_investor_hub',
@@ -115,7 +110,7 @@ print("P1_preprocess.py executed successfully.")
 print("Train shape:", X_processed.shape)
 print("Test shape:", X_test_processed.shape)
 
-# Export variables for import in P2
+
 __all__ = [
     "X_processed",
     "X_test_processed",
